@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- ... (keep existing styles) -->
+</head>
+<body>
+  <h1>Movie Recommendation System</h1>
+  <form id="recommendForm">
+    <input type="text" id="movieTitle" placeholder="Enter movie title" required />
+    <button type="submit" id="submitBtn">Get Recommendations</button>
+    <div id="loading" style="display: none; color: #666;">Loading recommendations...</div>
+  </form>
+  <div class="result">
+    <h2>Recommendations:</h2>
+    <ul id="recommendations"></ul>
+  </div>
+  <script>
+    document.getElementById("recommendForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const movieTitleInput = document.getElementById("movieTitle");
+      const movieTitle = movieTitleInput.value.trim();
+      const submitBtn = document.getElementById("submitBtn");
+      const loadingDiv = document.getElementById("loading");
+      const recommendationsList = document.getElementById("recommendations");
+
+      if (!movieTitle) {
+        alert("Please enter a movie title.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      loadingDiv.style.display = "block";
+      recommendationsList.innerHTML = "";
+
+      try {
+        // Fetch recommendations
+        const data = await fetchRecommendations(movieTitle);
+        
+        if (data.error) {
+          alert(data.error);
+        } else if (data.recommendations && data.recommendations.length > 0) {
+          data.recommendations.forEach(movie => {
+            const li = document.createElement("li");
+            li.textContent = movie;
+            recommendationsList.appendChild(li);
+          });
+        } else {
+          alert("No recommendations found.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to fetch recommendations.");
+      } finally {
+        submitBtn.disabled = false;
+        loadingDiv.style.display = "none";
+      }
+    });
+
+    async function fetchRecommendations(title) {
+      try {
+        const response = await fetch("http://localhost:8000/recommend", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title: title }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Fetch error:", error);
+        return { error: "Failed to connect to the server." };
+      }
+    }
+  </script>
+</body>
+</html>
