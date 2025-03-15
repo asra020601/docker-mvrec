@@ -18,7 +18,7 @@ class MovieRequest(BaseModel):
     title: str
 
 # Path to your HTML file
-HTML_FILE_PATH = "C:/Users/asrah/Desktop/mrs_proj/index.html"
+HTML_FILE_PATH = "index.html"
 
 @app.get("/", response_class=HTMLResponse)
 async def get_html():
